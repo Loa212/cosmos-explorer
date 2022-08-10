@@ -1,12 +1,32 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "../server/router";
-import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import "../styles/globals.css";
+import { NextPage } from "next";
+import { ReactElement } from "react";
+import { AppProps } from "next/app";
+import { PortalProvider } from "../utils/hooks/Portal/PortalContext";
 
-const MyApp: AppType = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
+//type for layouts
+export type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => JSX.Element;
+};
+
+export type LayoutProps = {
+  children: React.ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
+  // Use the layout defined at the page level, if available
+  const getLayout = Component.getLayout ?? ((page) => page);
+  return (
+    <PortalProvider>{getLayout(<Component {...pageProps} />)}</PortalProvider>
+  );
 };
 
 const getBaseUrl = () => {
