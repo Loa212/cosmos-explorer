@@ -2,7 +2,13 @@ import Head from "next/head";
 import HomeLayout from "../layouts/HomeLayout";
 // import { trpc } from "../utils/trpc";
 import { NextPageWithLayout } from "./_app";
-import { MdSearch } from "react-icons/md";
+import {
+  MdArrowBackIos,
+  MdArrowForwardIos,
+  MdFirstPage,
+  MdLastPage,
+  MdSearch,
+} from "react-icons/md";
 import { useState } from "react";
 import SpinnerIcon from "../components/SpinnerIcon";
 
@@ -18,14 +24,19 @@ const Home: NextPageWithLayout = () => {
   const [Address, setAddress] = useState("");
   const [Txs, setTxs] = useState<null | Array<any>>(null);
   const [Loading, setLoading] = useState(false);
+  const [LastTxId, setLastTxId] = useState(0);
+  const [Page, setPage] = useState(0);
 
   const searchTxs = async () => {
     setLoading(true);
-    const res = await fetch("api/getWalletTransactions?address=" + Address);
+    const res = await fetch(
+      "api/getWalletTransactions?address=" + Address + "&from=" + LastTxId
+    );
     if (res.ok) {
-      const json = await res.json();
-      setTxs(json);
-      console.log(json);
+      const txs = await res.json();
+      //set last tx id to the last tx id of the last tx
+      setLastTxId(txs[txs.length - 1].header.id);
+      setTxs(txs);
     } else {
       setTxs(null);
       console.log(res.statusText);
@@ -41,7 +52,9 @@ const Home: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="grow bg-slate-100 ring-1 ring-slate-700/20 max-w-3xl mx-auto w-full lg:my-8 rounded-lg p-6 lg:p-8 text-slate-700">
+      <div className="relative grow bg-slate-100 ring-1 ring-slate-700/20 max-w-3xl mx-auto w-full lg:my-8 rounded-lg p-6 lg:p-8 text-slate-700">
+        <PaginationControls Page={Page} />
+
         <h1 className="text-4xl text-center text-violet-800 font-medium py-2">
           Cosmos explorer
         </h1>
@@ -77,11 +90,17 @@ const Home: NextPageWithLayout = () => {
           {Loading ? (
             <p>Loading...</p>
           ) : Txs ? (
-            <ul className="space-y-4 text-slate-700">
-              {Txs.map((tx) => (
-                <Transaction tx={tx} key={tx.data.txhash} />
-              ))}
-            </ul>
+            <>
+              {Txs.length > 0 ? (
+                <ul className="space-y-4 text-slate-700">
+                  {Txs.map((tx) => (
+                    <Transaction tx={tx} key={tx.data.txhash} />
+                  ))}
+                </ul>
+              ) : (
+                <p>No transactions found</p>
+              )}
+            </>
           ) : (
             <p className="text-slate-700/80">No transactions</p>
           )}
@@ -105,5 +124,29 @@ function Transaction({ tx }: { tx: any }) {
       </p>
       {tx.data.data ? <p>✅</p> : <p>❌</p>}
     </li>
+  );
+}
+
+function PaginationControls({ Page }: { Page: number }) {
+  return (
+    <div className="absolute flex items-center justify-between bottom-2 inset-x-0  rounded-md mx-2 bg-violet-200 lg:mx-auto lg:max-w-sm">
+      <button className="text-2xl p-4 hover:bg-violet-300">
+        <MdFirstPage />
+      </button>
+
+      <button className="p-5 hover:bg-violet-300">
+        <MdArrowBackIos />
+      </button>
+
+      <p className="grow text-center text-slate-700">{Page + 1} - 12</p>
+
+      <button className="p-5 hover:bg-violet-300">
+        <MdArrowForwardIos />
+      </button>
+
+      <button className="text-2xl p-4 hover:bg-violet-300">
+        <MdLastPage />
+      </button>
+    </div>
   );
 }
