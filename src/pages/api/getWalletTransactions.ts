@@ -22,7 +22,7 @@ const _getWalletTransactions = async (req: NextApiRequest) => {
   if (!address) {
     throw new Error("address is required");
   }
-  const apiUrl = `https://api.cosmostation.io/v1/account/new_txs/${address}?limit=10&from=0`;
+  const apiUrl = `https://api.cosmostation.io/v1/account/new_txs/${address}?limit=10`;
   //TODO:fetch DB for transactions
 
   //TODO:get transactions from [cosmostation] api starting from latest DB block

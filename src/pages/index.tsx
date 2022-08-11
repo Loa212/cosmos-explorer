@@ -6,6 +6,12 @@ import { MdSearch } from "react-icons/md";
 import { useState } from "react";
 import SpinnerIcon from "../components/SpinnerIcon";
 
+const clampHash = (hash: string) => {
+  const start = hash.substring(0, 6);
+  const end = hash.substring(hash.length - 6, hash.length);
+  return `${start}...${end}`;
+};
+
 const Home: NextPageWithLayout = () => {
   // const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
 
@@ -71,14 +77,7 @@ const Home: NextPageWithLayout = () => {
           ) : Txs ? (
             <ul className="space-y-4 text-slate-700">
               {Txs.map((tx) => (
-                <li
-                  key={tx.data.txhash}
-                  className="bg-slate-200 px-1 py-2 rounded-md shadow-sm"
-                >
-                  <p className="text-xs text-ellipsis overflow-clip">
-                    {tx.data.txhash}
-                  </p>
-                </li>
+                <Transaction tx={tx} key={tx.data.txhash} />
               ))}
             </ul>
           ) : (
@@ -95,3 +94,14 @@ export default Home;
 Home.getLayout = function getLayout(page) {
   return <HomeLayout>{page}</HomeLayout>;
 };
+
+function Transaction({ tx }: { tx: any }) {
+  return (
+    <li className="bg-slate-200 px-1 py-2 lg:px-4 rounded-md shadow-sm flex items-center justify-between">
+      <p className="text-xs text-ellipsis overflow-clip">
+        {clampHash(tx.data.txhash)}
+      </p>
+      {tx.data.data ? <p>✅</p> : <p>❌</p>}
+    </li>
+  );
+}
