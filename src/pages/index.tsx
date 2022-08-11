@@ -15,8 +15,6 @@ const clampHash = (hash: string) => {
 const Home: NextPageWithLayout = () => {
   // const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
 
-  // const address = "cosmos1vl5j0anles8ejmf4qf69h99r3zazw0ydmpsy4p";
-
   const [Address, setAddress] = useState("");
   const [Txs, setTxs] = useState<null | Array<any>>(null);
   const [Loading, setLoading] = useState(false);
@@ -69,9 +67,13 @@ const Home: NextPageWithLayout = () => {
           </button>
         </div>
         <div>
-          <p className="text-slate-700/80 font-medium text-lg py-2">
+          <p className="text-slate-700/80 font-medium text-lg py-2 lg:text-2xl lg:pb-8">
             Transactions:
           </p>
+          <div className="flex font-medium text-slate-700 text-sm items-center justify-between py-2 px-2 pl-4 pr-2 lg:pl-8">
+            <p>Tx Hash</p>
+            <p>Status</p>
+          </div>
           {Loading ? (
             <p>Loading...</p>
           ) : Txs ? (
@@ -97,7 +99,7 @@ Home.getLayout = function getLayout(page) {
 
 function Transaction({ tx }: { tx: any }) {
   return (
-    <li className="bg-slate-200 px-1 py-2 lg:px-4 rounded-md shadow-sm flex items-center justify-between">
+    <li className="bg-slate-200 hover:bg-slate-300 py-2 px-4 rounded-md shadow-sm flex items-center justify-between">
       <p className="text-xs text-ellipsis overflow-clip">
         {clampHash(tx.data.txhash)}
       </p>
