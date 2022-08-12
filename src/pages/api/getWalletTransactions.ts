@@ -24,7 +24,7 @@ const _getWalletTransactions = async (req: NextApiRequest) => {
   }
   //from is the header.id of the last transaction in the array || zero
   const from = req.query.from || 0;
-  const apiUrl = `https://api.cosmostation.io/v1/account/new_txs/${address}?limit=10&from=${from}`;
+  const apiUrl = `https://api.cosmostation.io/v1/account/new_txs/${address}?limit=20&from=${from}`;
   //TODO:fetch DB for transactions
 
   //TODO:get transactions from [cosmostation] api starting from latest DB block
