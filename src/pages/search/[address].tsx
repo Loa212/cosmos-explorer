@@ -82,8 +82,9 @@ const Search: NextPageWithLayout = () => {
             <p className="text-slate-700/80 font-medium text-lg py-2 lg:text-2xl lg:pb-4">
               Transactions:
             </p>
-            <div className="flex font-medium text-slate-700 text-sm items-center justify-between py-2 px-2 pl-4 pr-2 lg:pl-8">
+            <div className="grid grid-cols-4 text-center w-full font-medium text-slate-700 text-sm items-center justify-between py-2 px-2 ">
               <p>Tx Hash</p>
+              <p>Amount</p>
               <p>Time</p>
               <p>Status</p>
             </div>
@@ -123,16 +124,35 @@ Search.getLayout = function getLayout(page) {
 };
 
 const clampHash = (hash: string) => {
-  const start = hash.substring(0, 6);
-  const end = hash.substring(hash.length - 6, hash.length);
+  const start = hash.substring(0, 4);
+  const end = hash.substring(hash.length - 4, hash.length);
   return `${start}...${end}`;
 };
 
+// "tx": {
+//   "@type": "/cosmos.tx.v1beta1.Tx",
+//   "body": {
+//       "messages": [
+//           {
+//               "@type": "/cosmos.bank.v1beta1.MsgSend",
+//               "from_address": "cosmos17kvae2jckzpkct78yealre3ms2gu28cdmtwsv7",
+//               "to_address": "cosmos16zmcaxg9htsjvsvj20sauz25mfyz39tge5d2wq",
+//               "amount": [
+//                   {
+//                       "denom": "uatom",
+//                       "amount": "9127522"
+//                   }
+//               ]
+//           }
+//       ],
+
 function Transaction({ tx }: { tx: any }) {
   return (
-    <li className="bg-slate-200 hover:bg-slate-300 text-xs py-2 px-4 rounded-md shadow-sm flex items-center justify-between">
-      <p className=" text-ellipsis overflow-clip">
-        {clampHash(tx.data.txhash)}
+    <li className="bg-slate-200 hover:bg-slate-300 text-xs p-2 rounded-md shadow-sm grid grid-cols-4 w-full items-center text-center justify-between">
+      <p className="">{clampHash(tx.data.txhash)}</p>
+      <p>
+        {tx.data.tx.body.messages[0].amount[0].amount / 1000000}{" "}
+        <span className="text-violet-700">ATOM</span>{" "}
       </p>
       {formatDistance(new Date(tx.data.timestamp), new Date(), {
         addSuffix: true,
