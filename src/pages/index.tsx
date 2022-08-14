@@ -1,20 +1,11 @@
 import Head from "next/head";
 import HomeLayout from "../layouts/HomeLayout";
-import { trpc } from "../utils/trpc";
 import { NextPageWithLayout } from "./_app";
 import { MdSearch } from "react-icons/md";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
 const Home: NextPageWithLayout = () => {
-  // const { isFetching, error, data } = trpc.useQuery([
-  //   "transactionsgetTxs",
-  //   {
-  //     address: "cosmos1jde6llljx9925vlahp5yk4jjljtdexm07xtxmu",
-  //     from: 0,
-  //   },
-  // ]);
-
   const [Address, setAddress] = useState("");
   const router = useRouter();
 

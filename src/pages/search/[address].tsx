@@ -1,3 +1,4 @@
+import { format, formatDistance } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import {
   MdLastPage,
   MdSearch,
 } from "react-icons/md";
+import PaginationControls from "../../components/PaginationControls";
 import SpinnerIcon from "../../components/SpinnerIcon";
 import HomeLayout from "../../layouts/HomeLayout";
 import { trpc } from "../../utils/trpc";
@@ -49,7 +51,7 @@ const Search: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="grow flex flex-col">
-        <div className="relative lg:my-6 grow bg-slate-100 ring-1 ring-slate-700/20 max-w-3xl mx-auto w-full rounded-lg p-6 lg:p-8 text-slate-700">
+        <div className="relative lg:my-6 grow bg-slate-100 ring-1 ring-slate-700/20 max-w-3xl mx-auto w-full rounded-lg p-2 py-6 lg:p-8 text-slate-700">
           <h1 className="text-4xl text-center text-violet-800 font-medium py-2">
             Cosmos explorer
           </h1>
@@ -82,6 +84,7 @@ const Search: NextPageWithLayout = () => {
             </p>
             <div className="flex font-medium text-slate-700 text-sm items-center justify-between py-2 px-2 pl-4 pr-2 lg:pl-8">
               <p>Tx Hash</p>
+              <p>Time</p>
               <p>Status</p>
             </div>
             {isFetching ? (
@@ -127,64 +130,14 @@ const clampHash = (hash: string) => {
 
 function Transaction({ tx }: { tx: any }) {
   return (
-    <li className="bg-slate-200 hover:bg-slate-300 py-2 px-4 rounded-md shadow-sm flex items-center justify-between">
-      <p className="text-xs text-ellipsis overflow-clip">
+    <li className="bg-slate-200 hover:bg-slate-300 text-xs py-2 px-4 rounded-md shadow-sm flex items-center justify-between">
+      <p className=" text-ellipsis overflow-clip">
         {clampHash(tx.data.txhash)}
       </p>
+      {formatDistance(new Date(tx.data.timestamp), new Date(), {
+        addSuffix: true,
+      })}
       {tx.data.data ? <p>✅</p> : <p>❌</p>}
     </li>
-  );
-}
-
-function PaginationControls({ Length }: { Length: number }) {
-  const router = useRouter();
-  const { address, page } = router.query;
-  const pageInt = parseInt(page as string);
-  return (
-    <div className="absolute flex items-center justify-between bottom-2 inset-x-0  rounded-md mx-2 bg-violet-200 lg:mx-auto lg:max-w-sm">
-      <button
-        disabled={pageInt === 0}
-        onClick={() => {
-          router.push(`/search/${address}?page=0`);
-        }}
-        className="text-2xl p-4 hover:bg-violet-300 disabled:opacity-20"
-      >
-        <MdFirstPage />
-      </button>
-
-      <button
-        disabled={pageInt === 0}
-        onClick={() => {
-          router.push(`/search/${address}?page=${pageInt - 1}`);
-        }}
-        className="p-5 hover:bg-violet-300 disabled:opacity-20"
-      >
-        <MdArrowBackIos />
-      </button>
-
-      <p className="grow text-center text-slate-700">
-        {pageInt + 1} - {Length}
-      </p>
-
-      <button
-        disabled={pageInt === Length - 1}
-        onClick={() => {
-          router.push(`/search/${router.query.address}?page=${pageInt + 1}`);
-        }}
-        className="p-5 hover:bg-violet-300 disabled:opacity-20"
-      >
-        <MdArrowForwardIos />
-      </button>
-
-      <button
-        disabled={pageInt === Length - 1}
-        onClick={() => {
-          router.push(`/search/${address}?page=${Length - 1}`);
-        }}
-        className="text-2xl p-4 hover:bg-violet-300 disabled:opacity-20"
-      >
-        <MdLastPage />
-      </button>
-    </div>
   );
 }
