@@ -1,7 +1,6 @@
-import { router } from "@trpc/server";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MdArrowBackIos,
   MdArrowForwardIos,
@@ -11,6 +10,7 @@ import {
 } from "react-icons/md";
 import SpinnerIcon from "../../components/SpinnerIcon";
 import HomeLayout from "../../layouts/HomeLayout";
+import { trpc } from "../../utils/trpc";
 import { NextPageWithLayout } from "../_app";
 
 const Search: NextPageWithLayout = () => {
@@ -19,8 +19,6 @@ const Search: NextPageWithLayout = () => {
   const pageInt = parseInt(page as string);
   const [Address, setAddress] = useState("");
   const [Txs, setTxs] = useState<null | Array<any>>(null);
-  const [ResultAddress, setResultAddress] = useState("");
-  const [Loading, setLoading] = useState(false);
   const [LastTxId, setLastTxId] = useState(0);
 
   useEffect(() => {
@@ -29,39 +27,19 @@ const Search: NextPageWithLayout = () => {
     }
   }, [address]);
 
-  useEffect(() => {
-    const getTsx = async () => {
-      setLoading(true);
-      const res = await fetch(
-        "/api/getWalletTransactions?address=" + address + "&from=" + 0
-      );
-      if (res.ok) {
-        const txs = await res.json();
-        //set last tx id to the last tx id of the last tx
-        // setLastTxId(txs[txs.length - 1].header.id);
-        const txsSplit = [];
-        for (let i = 0; i < txs.length; i += 5) {
-          txsSplit.push(txs.slice(i, i + 5));
-        }
-        console.log({ txsSplit });
-        setTxs(txsSplit);
-        setResultAddress(address as string);
-      } else {
-        setTxs(null);
-        console.log(res.statusText);
-      }
-      setLoading(false);
-    };
+  const { isFetching, error, data } = trpc.useQuery([
+    "transactionsgetTxs",
+    {
+      address: address as string,
+      from: LastTxId,
+    },
+  ]);
 
-    if (!address) return;
-    if (!page) return;
-    if (ResultAddress === address) return;
-    getTsx();
-
-    // return () => {
-    //   second
-    // }
-  }, [address, page, ResultAddress]);
+  function showTxInPage(index: number, pageInt: number) {
+    if (index >= pageInt * 4 && index < (pageInt + 1) * 4) {
+      return true;
+    }
+  }
 
   return (
     <>
@@ -84,7 +62,7 @@ const Search: NextPageWithLayout = () => {
               className="grow w-full p-2 ring-1 ring-slate-700/20 rounded text-slate-700 focus:outline-violet-700/60  focus:ring-4 focus:ring-offset-2 focus:ring-violet-600/10"
               placeholder="search by wallet address"
               value={Address}
-              disabled={Loading}
+              disabled={isFetching}
               onChange={(e) => setAddress(e.target.value)}
             />
             <button
@@ -92,10 +70,10 @@ const Search: NextPageWithLayout = () => {
               onClick={() => {
                 router.push("/search/" + Address + "?page=" + 0);
               }}
-              disabled={!Address || Loading}
+              disabled={!Address || isFetching}
             >
               Search
-              {Loading ? <SpinnerIcon /> : <MdSearch className="text-lg" />}
+              {isFetching ? <SpinnerIcon /> : <MdSearch className="text-lg" />}
             </button>
           </div>
           <div>
@@ -106,17 +84,19 @@ const Search: NextPageWithLayout = () => {
               <p>Tx Hash</p>
               <p>Status</p>
             </div>
-            {Loading ? (
+            {isFetching ? (
               <p>Loading...</p>
-            ) : Txs ? (
+            ) : data ? (
               <>
-                {Txs.length > 0 ? (
+                {data.length > 0 ? (
                   <div className="lg:py-4">
-                    <PaginationControls Length={Txs.length} />
+                    <PaginationControls Length={Math.ceil(data.length / 4)} />
                     <ul className="space-y-4 text-slate-700">
-                      {Txs[pageInt].map((tx: any) => (
-                        <Transaction tx={tx} key={tx.data.txhash} />
-                      ))}
+                      {data.map((tx: any, index: number) => {
+                        if (showTxInPage(index, pageInt)) {
+                          return <Transaction tx={tx} key={tx.data.txhash} />;
+                        }
+                      })}
                     </ul>
                   </div>
                 ) : (
@@ -199,7 +179,7 @@ function PaginationControls({ Length }: { Length: number }) {
       <button
         disabled={pageInt === Length - 1}
         onClick={() => {
-          router.push(`/search/${address}?page=3`);
+          router.push(`/search/${address}?page=${Length - 1}`);
         }}
         className="text-2xl p-4 hover:bg-violet-300 disabled:opacity-20"
       >
