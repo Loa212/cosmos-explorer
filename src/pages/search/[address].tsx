@@ -129,29 +129,12 @@ const clampHash = (hash: string) => {
   return `${start}...${end}`;
 };
 
-// "tx": {
-//   "@type": "/cosmos.tx.v1beta1.Tx",
-//   "body": {
-//       "messages": [
-//           {
-//               "@type": "/cosmos.bank.v1beta1.MsgSend",
-//               "from_address": "cosmos17kvae2jckzpkct78yealre3ms2gu28cdmtwsv7",
-//               "to_address": "cosmos16zmcaxg9htsjvsvj20sauz25mfyz39tge5d2wq",
-//               "amount": [
-//                   {
-//                       "denom": "uatom",
-//                       "amount": "9127522"
-//                   }
-//               ]
-//           }
-//       ],
-
 function Transaction({ tx }: { tx: any }) {
   return (
     <li className="bg-slate-200 hover:bg-slate-300 text-xs p-2 rounded-md shadow-sm grid grid-cols-4 w-full items-center text-center justify-between">
       <p className="">{clampHash(tx.data.txhash)}</p>
       <p>
-        {tx.data.tx.body.messages[0].amount[0].amount / 1000000}{" "}
+        ???
         <span className="text-violet-700">ATOM</span>{" "}
       </p>
       {formatDistance(new Date(tx.data.timestamp), new Date(), {
