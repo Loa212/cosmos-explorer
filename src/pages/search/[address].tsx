@@ -1,14 +1,8 @@
-import { format, formatDistance } from "date-fns";
+import { formatDistance } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import {
-  MdArrowBackIos,
-  MdArrowForwardIos,
-  MdFirstPage,
-  MdLastPage,
-  MdSearch,
-} from "react-icons/md";
+import { MdSearch } from "react-icons/md";
 import PaginationControls from "../../components/PaginationControls";
 import SpinnerIcon from "../../components/SpinnerIcon";
 import HomeLayout from "../../layouts/HomeLayout";
@@ -20,7 +14,6 @@ const Search: NextPageWithLayout = () => {
   const { address, page } = router.query;
   const pageInt = parseInt(page as string);
   const [Address, setAddress] = useState("");
-  const [Txs, setTxs] = useState<null | Array<any>>(null);
   const [LastTxId, setLastTxId] = useState(0);
 
   useEffect(() => {
@@ -129,13 +122,34 @@ const clampHash = (hash: string) => {
   return `${start}...${end}`;
 };
 
+const getTxAmount = (tx: any) => {
+  const msgs = tx.data.tx.body.messages;
+  let retVal = 0;
+  msgs.forEach((msg: any) => {
+    if (Object.keys(msg).includes("amount")) {
+      if (Array.isArray(msg.amount)) {
+        retVal = parseFloat(msg.amount[0]?.amount) / 1000000;
+      } else {
+        retVal = parseFloat(msg.amount.amount) / 1000000;
+      }
+    }
+  });
+  return retVal.toString().split(".");
+};
+
 function Transaction({ tx }: { tx: any }) {
   return (
     <li className="bg-slate-200 hover:bg-slate-300 text-xs p-2 rounded-md shadow-sm grid grid-cols-4 w-full items-center text-center justify-between">
       <p className="">{clampHash(tx.data.txhash)}</p>
       <p>
-        ???
-        <span className="text-violet-700">ATOM</span>{" "}
+        {getTxAmount(tx)[0]}
+        {getTxAmount(tx)[1] ? (
+          <span className="text-xxs">. {getTxAmount(tx)[1]}</span>
+        ) : (
+          ""
+        )}
+
+        <span className="text-violet-700">ATOM</span>
       </p>
       {formatDistance(new Date(tx.data.timestamp), new Date(), {
         addSuffix: true,
